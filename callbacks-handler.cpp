@@ -75,13 +75,26 @@ void CallbackHandler::onInit() {
         return;
     }
 
-    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
-    if (callbackClass == nullptr) {
-        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler");
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onInitMethod = m_env->GetMethodID(callbackClass, "onInit", "()V");
+        if (onInitMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackClass, onInitMethod);
         return;
     }
 
-    // Get the method ID for the 'onInit' instance method
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
     jmethodID onInitMethod = m_env->GetMethodID(callbackClass, "onInit", "()V");
     if (onInitMethod == nullptr) {
         fprintf(stderr, "Error: onInit method not found");

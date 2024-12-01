@@ -88,40 +88,23 @@ void CallbackHandler::onInit() {
         return;
     }
 
-    // Now get the singleton instance of MyCallbackHandler
-    jmethodID getInstanceMethod = m_env->GetStaticMethodID(callbackClass, "getInstance", "(Ldev/xframes/XFramesWrapper;)Ldev/xframes/MyCallbackHandler;");
-    if (getInstanceMethod != nullptr) {
-        // Java?
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
 
-        // Call getInstance() to get the singleton instance
-        jobject callbackHandlerInstance = m_env->CallStaticObjectMethod(callbackClass, getInstanceMethod, m_xframes);
-        if (callbackHandlerInstance == nullptr) {
-            fprintf(stderr, "Error: Failed to get MyCallbackHandler instance\n");
-            return;
-        }
-
-        // Call the onInit method on the singleton instance
-        m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
-    } else {
-        // Kotlin?
-        jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
-
-        if (singletonField == nullptr) {
-            fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
-            m_env->ExceptionDescribe();
-            return;
-        }
-
-        jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
-
-        if (callbackHandlerInstance == nullptr) {
-            fprintf(stderr, "callbackHandlerInstance not found\n");
-            m_env->ExceptionDescribe();
-            return;
-        }
-
-        m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
     }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
 };
 
 void CallbackHandler::onTextChanged(int id, const char* text) {

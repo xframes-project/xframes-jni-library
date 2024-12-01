@@ -13,6 +13,8 @@ public:
 
     ~CallbackHandler();
 
+    void logMessage(const char* message);
+
     void onInit();
 
     // onTextChanged callback

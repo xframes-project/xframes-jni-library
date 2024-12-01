@@ -19,24 +19,72 @@ CallbackHandler::~CallbackHandler() {
     }
 };
 
-void CallbackHandler::onInit() {
+void CallbackHandler::logMessage(const char* message) {
     jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
     if (res != JNI_OK) {
         fprintf(stderr, "Error: Unable to attach thread to JVM\n");
         return;
     }
 
+    // Find the System class
+    jclass systemClass = m_env->FindClass("java/lang/System");
+    if (systemClass == nullptr) {
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    // Get the 'out' field
+    jfieldID outField = m_env->GetStaticFieldID(systemClass, "out", "Ljava/io/PrintStream;");
+    if (outField == nullptr) {
+        m_env->ExceptionDescribe();
+        return;
+    }
+    jobject outObject = m_env->GetStaticObjectField(systemClass, outField);
+    if (outObject == nullptr) {
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    // Find the PrintStream.println(String) method
+    jclass printStreamClass = m_env->FindClass("java/io/PrintStream");
+    if (printStreamClass == nullptr) {
+        m_env->ExceptionDescribe();
+        return;
+    }
+    jmethodID printlnMethod = m_env->GetMethodID(printStreamClass, "println", "(Ljava/lang/String;)V");
+    if (printlnMethod == nullptr) {
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    // Create a Java String and call println
+    jstring javaMessage = m_env->NewStringUTF(message);
+    if (javaMessage == nullptr) {
+        return; // Out of memory error
+    }
+    m_env->CallVoidMethod(outObject, printlnMethod, javaMessage);
+
+    // Clean up
+    m_env->DeleteLocalRef(javaMessage);
+}
+
+void CallbackHandler::onInit() {
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
+    }
+
     jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
     if (callbackClass == nullptr) {
-        m_env->ExceptionDescribe();
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler");
         return;
     }
 
     // Get the method ID for the 'onInit' instance method
     jmethodID onInitMethod = m_env->GetMethodID(callbackClass, "onInit", "()V");
     if (onInitMethod == nullptr) {
-        printf("onInit method not found\n");
-        m_env->ExceptionDescribe();
+        fprintf(stderr, "Error: onInit method not found");
         return;
     }
 
@@ -48,7 +96,7 @@ void CallbackHandler::onInit() {
         // Call getInstance() to get the singleton instance
         jobject callbackHandlerInstance = m_env->CallStaticObjectMethod(callbackClass, getInstanceMethod, m_xframes);
         if (callbackHandlerInstance == nullptr) {
-            printf("Failed to get MyCallbackHandler instance\n");
+            fprintf(stderr, "Error: Failed to get MyCallbackHandler instance\n");
             return;
         }
 
@@ -59,7 +107,7 @@ void CallbackHandler::onInit() {
         jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
 
         if (singletonField == nullptr) {
-            printf("INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+            fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
             m_env->ExceptionDescribe();
             return;
         }
@@ -67,7 +115,7 @@ void CallbackHandler::onInit() {
         jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
 
         if (callbackHandlerInstance == nullptr) {
-            printf("callbackHandlerInstance not found\n");
+            fprintf(stderr, "callbackHandlerInstance not found\n");
             m_env->ExceptionDescribe();
             return;
         }

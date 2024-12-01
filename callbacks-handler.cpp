@@ -26,14 +26,14 @@ void CallbackHandler::onInit() {
         return;
     }
 
-    jclass callbackClasss = m_env->FindClass("dev/xframes/MyCallbackHandler");
-    if (callbackClasss == nullptr) {
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
         m_env->ExceptionDescribe();
         return;
     }
 
     // Get the method ID for the 'onInit' instance method
-    jmethodID onInitMethod = m_env->GetMethodID(callbackClasss, "onInit", "()V");
+    jmethodID onInitMethod = m_env->GetMethodID(callbackClass, "onInit", "()V");
     if (onInitMethod == nullptr) {
         printf("onInit method not found\n");
         m_env->ExceptionDescribe();
@@ -41,22 +41,39 @@ void CallbackHandler::onInit() {
     }
 
     // Now get the singleton instance of MyCallbackHandler
-    jmethodID getInstanceMethod = m_env->GetStaticMethodID(callbackClasss, "getInstance", "(Ldev/xframes/XFramesWrapper;)Ldev/xframes/MyCallbackHandler;");
-    if (getInstanceMethod == nullptr) {
-        printf("getInstance method not found\n");
-        m_env->ExceptionDescribe();
-        return;
-    }
+    jmethodID getInstanceMethod = m_env->GetStaticMethodID(callbackClass, "getInstance", "(Ldev/xframes/XFramesWrapper;)Ldev/xframes/MyCallbackHandler;");
+    if (getInstanceMethod != nullptr) {
+        // Java?
 
-    // Call getInstance() to get the singleton instance
-    jobject callbackHandlerInstance = m_env->CallStaticObjectMethod(callbackClasss, getInstanceMethod, m_xframes);
-    if (callbackHandlerInstance == nullptr) {
-        printf("Failed to get MyCallbackHandler instance\n");
-        return;
-    }
+        // Call getInstance() to get the singleton instance
+        jobject callbackHandlerInstance = m_env->CallStaticObjectMethod(callbackClass, getInstanceMethod, m_xframes);
+        if (callbackHandlerInstance == nullptr) {
+            printf("Failed to get MyCallbackHandler instance\n");
+            return;
+        }
 
-    // Call the onInit method on the singleton instance
-    m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
+        // Call the onInit method on the singleton instance
+        m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
+    } else {
+        // Kotlin?
+        jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+        if (singletonField == nullptr) {
+            printf("INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+            m_env->ExceptionDescribe();
+            return;
+        }
+
+        jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+        if (callbackHandlerInstance == nullptr) {
+            printf("callbackHandlerInstance not found\n");
+            m_env->ExceptionDescribe();
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackHandlerInstance, onInitMethod);
+    }
 };
 
 void CallbackHandler::onTextChanged(int id, const char* text) {

@@ -121,80 +121,323 @@ void CallbackHandler::onInit() {
 };
 
 void CallbackHandler::onTextChanged(int id, const char* text) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onTextChangedMethod = m_env->GetMethodID(callbackClass, "onTextChanged", "(ILjava/lang/String;)V");
-    if (onTextChangedMethod != NULL) {
-        jstring jText = m_env->NewStringUTF(text);
-        m_env->CallVoidMethod(m_callbacks, onTextChangedMethod, id, jText);
-        m_env->DeleteLocalRef(jText);  // Delete local reference to the string
-
-        if (m_env->ExceptionCheck()) {
-            m_env->ExceptionDescribe();
-            m_env->ExceptionClear();
-        }
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
     }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onTextChangedMethod = m_env->GetMethodID(callbackClass, "onTextChanged", "(ILjava/lang/String;)V");
+        if (onTextChangedMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        jstring jText = m_env->NewStringUTF(text);
+        m_env->CallVoidMethod(callbackClass, onTextChangedMethod, id, jText);
+        m_env->DeleteLocalRef(jText);
+        return;
+    }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onTextChangedMethod = m_env->GetMethodID(callbackClass, "onTextChanged", "(ILjava/lang/String;)V");
+    if (onTextChangedMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jstring jText = m_env->NewStringUTF(text);
+    m_env->CallVoidMethod(callbackHandlerInstance, onTextChangedMethod, id, jText);
+    m_env->DeleteLocalRef(jText);
 }
 
 void CallbackHandler::onComboChanged(int id, int value) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onComboChangedMethod = m_env->GetMethodID(callbackClass, "onComboChanged", "(II)V");
-    if (onComboChangedMethod != NULL) {
-        m_env->CallVoidMethod(m_callbacks, onComboChangedMethod, id, value);
-
-        if (m_env->ExceptionCheck()) {
-            m_env->ExceptionDescribe();
-            m_env->ExceptionClear();
-        }
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
     }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onComboChangedMethod = m_env->GetMethodID(callbackClass, "onComboChanged", "(II)V");
+        if (onComboChangedMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackClass, onComboChangedMethod, id, value);
+        return;
+    }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onComboChangedMethod = m_env->GetMethodID(callbackClass, "onComboChanged", "(II)V");
+    if (onComboChangedMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    m_env->CallVoidMethod(callbackHandlerInstance, onComboChangedMethod, id, value);
 }
 
 void CallbackHandler::onNumericValueChanged(int id, float value) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onNumericValueChangedMethod = m_env->GetMethodID(callbackClass, "onNumericValueChanged", "(IF)V");
-    if (onNumericValueChangedMethod != NULL) {
-        m_env->CallVoidMethod(m_callbacks, onNumericValueChangedMethod, id, value);
-
-        if (m_env->ExceptionCheck()) {
-            m_env->ExceptionDescribe();
-            m_env->ExceptionClear();
-        }
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
     }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onNumericValueChangedMethod = m_env->GetMethodID(callbackClass, "onNumericValueChanged", "(IF)V");
+        if (onNumericValueChangedMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackClass, onNumericValueChangedMethod, id, value);
+        return;
+    }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onNumericValueChangedMethod = m_env->GetMethodID(callbackClass, "onNumericValueChanged", "(IF)V");
+    if (onNumericValueChangedMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    m_env->CallVoidMethod(callbackHandlerInstance, onNumericValueChangedMethod, id, value);
 }
 
 void CallbackHandler::onBooleanValueChanged(int id, bool value) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onBooleanValueChangedMethod = m_env->GetMethodID(callbackClass, "onBooleanValueChanged", "(IZ)V");
-    if (onBooleanValueChangedMethod != NULL) {
-        m_env->CallVoidMethod(m_callbacks, onBooleanValueChangedMethod, id, value ? JNI_TRUE : JNI_FALSE);
-
-        if (m_env->ExceptionCheck()) {
-            m_env->ExceptionDescribe();
-            m_env->ExceptionClear();
-        }
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
     }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onBooleanValueChangedMethod = m_env->GetMethodID(callbackClass, "onBooleanValueChanged", "(IZ)V");
+        if (onBooleanValueChangedMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackClass, onBooleanValueChangedMethod, id, value ? JNI_TRUE : JNI_FALSE);
+        return;
+    }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onBooleanValueChangedMethod = m_env->GetMethodID(callbackClass, "onBooleanValueChanged", "(IZ)V");
+    if (onBooleanValueChangedMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    m_env->CallVoidMethod(callbackHandlerInstance, onBooleanValueChangedMethod, id, value ? JNI_TRUE : JNI_FALSE);
 }
 
 void CallbackHandler::onMultipleNumericValuesChanged(int id, float* values, int numValues) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onMultipleNumericValuesChangedMethod = m_env->GetMethodID(callbackClass, "onMultipleNumericValuesChanged", "(I[F)V");
-    if (onMultipleNumericValuesChangedMethod != NULL) {
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
+    }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onMultipleNumericValuesChangedMethod = m_env->GetMethodID(callbackClass, "onMultipleNumericValuesChanged", "(I[F)V");
+        if (onMultipleNumericValuesChangedMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
         jfloatArray jValues = m_env->NewFloatArray(numValues);
         m_env->SetFloatArrayRegion(jValues, 0, numValues, values);
-        m_env->CallVoidMethod(m_callbacks, onMultipleNumericValuesChangedMethod, id, jValues);
-        m_env->DeleteLocalRef(jValues);  // Delete local reference to the array
-
-        if (m_env->ExceptionCheck()) {
-            m_env->ExceptionDescribe();
-            m_env->ExceptionClear();
-        }
+        m_env->CallVoidMethod(callbackClass, onMultipleNumericValuesChangedMethod, id, jValues);
+        m_env->DeleteLocalRef(jValues);
+        return;
     }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onMultipleNumericValuesChangedMethod = m_env->GetMethodID(callbackClass, "onMultipleNumericValuesChanged", "(I[F)V");
+    if (onMultipleNumericValuesChangedMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jfloatArray jValues = m_env->NewFloatArray(numValues);
+    m_env->SetFloatArrayRegion(jValues, 0, numValues, values);
+    m_env->CallVoidMethod(callbackHandlerInstance, onMultipleNumericValuesChangedMethod, id, jValues);
+    m_env->DeleteLocalRef(jValues);
 }
 
-// onClick callback
 void CallbackHandler::onClick(int id) {
-    jclass callbackClass = m_env->GetObjectClass(m_callbacks);
-    jmethodID onClickMethod = m_env->GetMethodID(callbackClass, "onClick", "(I)V");
-    if (onClickMethod != NULL) {
-        m_env->CallVoidMethod(m_callbacks, onClickMethod, id);
+    jint res = m_jvm->AttachCurrentThread((void**)&m_env, nullptr);
+    if (res != JNI_OK) {
+        fprintf(stderr, "Error: Unable to attach thread to JVM");
+        return;
     }
+
+    jclass callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler$");
+    if (callbackClass != nullptr) {
+        // Scala
+        jmethodID onClickMethod = m_env->GetMethodID(callbackClass, "onClick", "(I)V");
+        if (onClickMethod == nullptr) {
+            fprintf(stderr, "Error: onInit method not found");
+            return;
+        }
+
+        m_env->CallVoidMethod(callbackClass, onClickMethod, id);
+        return;
+    }
+
+    // Java or Kotlin
+    callbackClass = m_env->FindClass("dev/xframes/MyCallbackHandler");
+    if (callbackClass == nullptr) {
+        fprintf(stderr, "Error: Unable to retrieve class pointer for dev/xframes/MyCallbackHandler$ or dev/xframes/MyCallbackHandler");
+        return;
+    }
+
+    jmethodID onClickMethod = m_env->GetMethodID(callbackClass, "onClick", "(I)V");
+    if (onClickMethod == nullptr) {
+        fprintf(stderr, "Error: onInit method not found");
+        return;
+    }
+
+    jfieldID singletonField = m_env->GetStaticFieldID(callbackClass, "INSTANCE", "Ldev/xframes/MyCallbackHandler;");
+
+    if (singletonField == nullptr) {
+        fprintf(stderr, "INSTANCE field in dev.xframes.MyCallbackhandler not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    jobject callbackHandlerInstance = m_env->GetStaticObjectField(callbackClass, singletonField);
+
+    if (callbackHandlerInstance == nullptr) {
+        fprintf(stderr, "callbackHandlerInstance not found\n");
+        m_env->ExceptionDescribe();
+        return;
+    }
+
+    m_env->CallVoidMethod(callbackHandlerInstance, onClickMethod, id);
 }
